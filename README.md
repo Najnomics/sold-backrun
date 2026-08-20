@@ -4,7 +4,7 @@
 [![Uniswap v4](https://img.shields.io/badge/Uniswap-v4%20hook-7c8bff.svg)](https://docs.uniswap.org/contracts/v4/overview)
 [![Unichain Sepolia](https://img.shields.io/badge/Unichain-Sepolia%201301-00d395.svg)](https://sepolia.uniscan.xyz)
 
-**Live desk:** [uhi10-sold-backrun.vercel.app](https://uhi10-sold-backrun.vercel.app) · **Agent:** [/agent](https://uhi10-sold-backrun.vercel.app/agent) · **Pool:** sbUSD / sbVOL · **Hook:** [`0x2F5EC31089512943E9cf06a7F949E445d8E9D0C4`](https://sepolia.uniscan.xyz/address/0x2F5EC31089512943E9cf06a7F949E445d8E9D0C4)
+**Live desk:** [uhi10-sold-backrun.vercel.app](https://uhi10-sold-backrun.vercel.app) · **Pitch:** [uhi10-sold-backrun-pitch.vercel.app](https://uhi10-sold-backrun-pitch.vercel.app) · **Agent:** [/agent](https://uhi10-sold-backrun.vercel.app/agent) · **Pool:** sbUSD / sbVOL · **Hook:** [`0x2F5EC31089512943E9cf06a7F949E445d8E9D0C4`](https://sepolia.uniscan.xyz/address/0x2F5EC31089512943E9cf06a7F949E445d8E9D0C4)
 
 > Every retail swap sells its own backrun. The sandwich dies because the leftover arb is already spoken for.
 
@@ -180,7 +180,7 @@ Not Fair Path (no attestation schedule). Not Surplus Sink (no Protect receipts).
 
 ```
 src/SoldBackrunHook.sol  src/SearcherBond.sol  src/BackrunAgent.sol
-test/  script/  frontend/
+test/  script/  frontend/  pitch/
 ```
 
 ## Hookathon gates

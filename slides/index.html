@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sold Backrun — Pitch Deck · UHI10</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #07090a; --bg-2: #101410; --ink: #eef6ea; --muted: #a8b6a4;
+        --teal: #c6ff3d; --indigo: #7c8bff; --line: rgba(198, 255, 61, 0.16);
+        --card: rgba(255, 255, 255, 0.035);
+      }
+      .reveal { font-family: "Inter", system-ui, sans-serif; color: var(--ink); font-size: 30px; }
+      .reveal-viewport {
+        background:
+          radial-gradient(1200px 700px at 80% -10%, rgba(124, 139, 255, 0.14), transparent 60%),
+          radial-gradient(1000px 600px at -10% 110%, rgba(198, 255, 61, 0.10), transparent 55%),
+          var(--bg);
+      }
+      .reveal h1, .reveal h2, .reveal h3 {
+        font-family: "Space Grotesk", sans-serif; font-weight: 700; color: var(--ink);
+        text-transform: none; letter-spacing: -0.01em; line-height: 1.08;
+      }
+      .reveal h1 { font-size: 2.5em; }
+      .reveal h2 { font-size: 1.55em; margin-bottom: 0.5em; }
+      .reveal h3 { font-size: 1.05em; }
+      .reveal p, .reveal li { color: var(--ink); line-height: 1.45; }
+      .reveal strong { color: #fff; }
+      .reveal em { color: var(--teal); font-style: normal; font-weight: 600; }
+      .reveal a { color: var(--indigo); text-decoration: none; }
+      .reveal section { text-align: left; }
+      .grad { background: linear-gradient(100deg, var(--teal), var(--indigo)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .kicker { font-family: "JetBrains Mono", monospace; font-size: 0.5em; letter-spacing: 0.28em; text-transform: uppercase; color: var(--teal); margin: 0 0 0.6em; }
+      .muted { color: var(--muted) !important; }
+      .lead { font-size: 1.15em; color: var(--muted); max-width: 22ch; }
+      .center { text-align: center; }
+      .big-quote { font-family: "Space Grotesk", sans-serif; font-size: 1.9em; font-weight: 700; line-height: 1.12; letter-spacing: -0.02em; }
+      .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+      .cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+      .card h3 { margin: 0 0 0.35em; }
+      .card p { margin: 0; font-size: 0.82em; color: var(--muted); }
+      .pill { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 0.6em; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); margin: 0 6px 8px 0; }
+      .pill.teal { color: var(--teal); border-color: rgba(198,255,61,0.45); }
+      .pill.indigo { color: var(--indigo); border-color: rgba(124,139,255,0.4); }
+      .reveal table { font-size: 0.68em; border-collapse: collapse; width: 100%; }
+      .reveal table th, .reveal table td { border-bottom: 1px solid var(--line); padding: 10px 12px; }
+      .reveal table th { color: var(--teal); text-align: left; font-weight: 600; }
+      .mono { font-family: "JetBrains Mono", monospace; font-size: 0.82em; }
+      .flow { display: flex; align-items: stretch; gap: 12px; }
+      .flow .step { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+      .flow .step .n { font-family: "JetBrains Mono", monospace; color: var(--indigo); font-size: 0.6em; }
+      .flow .step h3 { font-size: 0.92em; margin: 6px 0; }
+      .flow .step p { font-size: 0.66em; color: var(--muted); margin: 0; }
+      .flow .arrow { align-self: center; color: var(--teal); font-size: 1.4em; }
+      .footer-note { position: fixed; bottom: 14px; left: 22px; right: 22px; display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); opacity: 0.7; z-index: 5; }
+      .reveal .slide-number { background: transparent; color: var(--muted); }
+      .tag-live { display: inline-flex; align-items: center; gap: 8px; font-family: "JetBrains Mono", monospace; font-size: 0.55em; color: var(--teal); }
+      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 12px var(--teal); }
+      ul.tight li { margin: 0.35em 0; }
+    </style>
+  </head>
+  <body>
+    <div class="footer-note">
+      <span>Sold Backrun · Auction the backrun</span>
+      <span>UHI10 · Sustainable Liquidity &amp; MEV Protection</span>
+    </div>
+    <div class="reveal">
+      <div class="slides">
+
+        <section data-background-color="#07090a">
+          <p class="kicker">UHI10 · Uniswap v4 Hookathon · blue-benz</p>
+          <h1><span class="grad">Sold Backrun</span></h1>
+          <p class="big-quote" style="max-width: 22ch; margin-top: 0.2em;">
+            Don't hide the backrun. <span class="grad">Sell it.</span>
+          </p>
+          <p class="lead" style="max-width: 38ch; margin-top: 0.6em;">
+            A fill mints a two-block BackrunRight. Searchers bid in sbUSD. The winner's hunt donates to LPs — or the bid burns.
+          </p>
+          <p style="margin-top: 1em;">
+            <span class="tag-live"><span class="dot"></span> LIVE ON UNICHAIN SEPOLIA</span>
+            &nbsp;·&nbsp; <a href="https://uhi10-sold-backrun.vercel.app">uhi10-sold-backrun.vercel.app</a>
+          </p>
+          <aside class="notes">
+            Opening: the backrun is a product. Live sbUSD/sbVOL.
+          </aside>
+        </section>
+
+        <section>
+          <p class="kicker">The problem</p>
+          <h2>Retail already paid. The <span class="grad">backrun is leftover.</span></h2>
+          <div class="cols">
+            <div>
+              <ul class="tight">
+                <li>Every large swap leaves a <strong>predictable residual</strong> on the curve.</li>
+                <li>Searchers harvest it in the <strong>private mempool</strong> — LPs get none of it.</li>
+                <li>Hiding flow (delay, encryption) still lets the <strong>next public block</strong> get hunted for free.</li>
+                <li>TOB auctions sell <strong>first look</strong>, not the right to unwind <em>this</em> fill.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <p class="kicker" style="margin-bottom:0.4em;">The gap</p>
+              <p style="font-size:0.95em; color:var(--ink);">
+                Fair Flow prices <em>who built the block</em>.
+              </p>
+              <p style="font-size:0.95em; color:var(--ink); margin-top:0.6em;">
+                It does not turn the <strong>inventory left after a swap</strong> into a market LPs can collect.
+              </p>
+            </div>
+          </div>
+          <aside class="notes">
+            Residual vs first-look. Distinct from Fair Path corridors.
+          </aside>
+        </section>
+
+        <section data-background-color="#101410">
+          <p class="kicker">The insight</p>
+          <p class="big-quote">
+            After the fill, mint a <span class="grad">BackrunRight</span>.
+            Let searchers <span class="grad">bid</span> for it.
+            Settle to LPs — or <span class="grad">burn the bid.</span>
+          </p>
+          <p class="lead" style="max-width: 42ch; margin-top: 0.8em;">
+            The user is not delayed. The searcher is licensed. The leftover is no longer a free option on the pool.
+          </p>
+          <div style="margin-top: 1em;">
+            <span class="pill teal">Same pool</span>
+            <span class="pill teal">afterSwap mint</span>
+            <span class="pill indigo">Bid book</span>
+            <span class="pill indigo">2-block hunt</span>
+            <span class="pill indigo">donate()</span>
+          </div>
+          <aside class="notes">
+            Right, bid, hunt or expire. Bid is the price of leftover.
+          </aside>
+        </section>
+
+        <section>
+          <p class="kicker">How it works · the hook</p>
+          <h2>Mint in <span class="grad">afterSwap</span>. Hunt while the right is live.</h2>
+          <div class="flow">
+            <div class="step">
+              <div class="n">01 · afterSwap</div>
+              <h3>Mint the right</h3>
+              <p>Hash the fill into a <span class="mono">BackrunRight</span>: expiry = now + 2 blocks. Emit <span class="mono">RightMinted</span>.</p>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step">
+              <div class="n">02 · bid</div>
+              <h3>Auction the leftover</h3>
+              <p>Searchers lock sbUSD. Highest bid wins. Losing bids refund. Winner is licensed to hunt.</p>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step">
+              <div class="n">03 · hunt / expire</div>
+              <h3>Settle to LPs</h3>
+              <p>Winner swaps opposite within the window → bid <span class="mono">donate()</span>. Miss → bid burns to LPs anyway.</p>
+            </div>
+          </div>
+          <p class="muted" style="font-size:0.7em; margin-top: 1em;">
+            Retail swap fee stays honest. The auction is a <em>second market</em> on residual, not a tax on the user.
+          </p>
+          <aside class="notes">
+            Hunt must be opposite and in window. Bonded searcher.
+          </aside>
+        </section>
+
+        <section>
+          <p class="kicker">The trust model</p>
+          <h2>A license, not a <span class="grad">secret mempool</span></h2>
+          <div class="flow">
+            <div class="step">
+              <div class="n">01 · identity</div>
+              <h3>hookData searcher</h3>
+              <p>v4 <span class="mono">sender</span> is the router. The hunter is the 32-byte address in <span class="mono">hookData</span>.</p>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step">
+              <div class="n">02 · capital</div>
+              <h3>Bond + bid</h3>
+              <p>Bonded searcher posts sbUSD. The bid is escrow until hunt or expire — no hit-and-run.</p>
+            </div>
+            <div class="arrow">→</div>
+            <div class="step">
+              <div class="n">03 · window</div>
+              <h3>Two blocks</h3>
+              <p>After expiry, leftover is public again. LPs already collected the bid.</p>
+            </div>
+          </div>
+          <aside class="notes">
+            Not TEE-required. Auction + window is the trust.
+          </aside>
+        </section>
+
+        <section>
+          <p class="kicker">The economics per fill</p>
+          <h2>Retail stays cheap. Residual is priced.</h2>
+          <table>
+            <thead>
+              <tr><th>Lane</th><th>Who</th><th>Swap fee</th><th>LP recapture</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--teal)">Retail fill</strong></td>
+                <td class="muted">user / aggregator</td>
+                <td><strong>honest pool fee</strong></td>
+                <td class="muted">standard LP fee</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--indigo)">Winning bid</strong></td>
+                <td class="muted">bonded searcher</td>
+                <td>auction in sbUSD</td>
+                <td><strong>bid donated</strong> on hunt or expire</td>
+              </tr>
+              <tr>
+                <td><strong>Hunt fill</strong></td>
+                <td class="muted">winner, 2 blocks</td>
+                <td>licensed opposite swap</td>
+                <td>settles the right</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top: 1em; font-size: 0.9em;">
+            If nobody hunts, LPs still <span class="grad">keep the bid</span>. The option is never free.
+          </p>
+          <aside class="notes">
+            Contrast with Fair Path toxic tax — this is a second market.
+          </aside>
+        </section>
+
+        <section>
+          <p class="kicker">Complete user flow</p>
+          <div class="mermaid">
+sequenceDiagram
+  autonumber
+  actor User
+  participant UI as Console (v4 SDK)
+  participant PM as PoolManager
+  participant Hook as SoldBackrunHook
+  participant Book as Bid book
+  actor Searcher
+  participant LPs as In-range LPs
+  User->>UI: swap sbVOL/sbUSD
+  UI->>PM: swap via v4 router
+  PM->>Hook: afterSwap()
+  Hook-->>Hook: mint BackrunRight (T+2)
+  Searcher->>Book: bid sbUSD
+  Book-->>Searcher: highest bid wins
+  alt hunt in window
+    Searcher->>PM: opposite swap + hookData
+    Hook->>PM: donate bid to LPs
+  else expire
+    Hook->>PM: donate / burn bid to LPs
+  end
+          </div>
+          <aside class="notes">
+            Show hunt button after a large swap.
+          </aside>
+        </section>
+
+        <section>
+          <p class="kicker">What's implemented</p>
+          <h2>A real, valid v4 hook</h2>
+          <table>
+            <thead><tr><th>Function</th><th>Permission</th><th>Role</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">_afterInitialize</td><td class="muted">afterInitialize</td><td>Pool + token wiring</td></tr>
+              <tr><td class="mono">_afterSwap</td><td class="muted">afterSwap + returnDelta</td><td>Mint right / settle hunt</td></tr>
+              <tr><td class="mono">bid / hunt</td><td class="muted">external</td><td>Auction + licensed fill</td></tr>
+              <tr><td class="mono">expire</td><td class="muted">external</td><td>Bid → LPs if no hunt</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top: 0.8em;">
+            <span class="pill teal">RightMinted</span>
+            <span class="pill indigo">BidPlaced</span>
+            <span class="pill">Hunted</span>
+            <span class="pill">Expired</span>
+            <span class="pill">donate()</span>
+          </div>
+          <aside class="notes">
+            Cut to VS Code on afterSwap mint if needed.
+          </aside>
+        </section>
+
+        <section data-background-color="#101410">
+          <p class="kicker"><span class="tag-live"><span class="dot"></span> Live · not a mockup</span></p>
+          <h2>Cut to the desk here</h2>
+          <div class="cols-3">
+            <div class="card"><h3>Trade</h3><p>sbVOL / sbUSD. A fill should mint a right in the tape.</p></div>
+            <div class="card"><h3>Auction</h3><p>Post a bid in sbUSD. Highest bid owns the hunt.</p></div>
+            <div class="card"><h3>Hunt</h3><p>Opposite swap inside two blocks — bid donates to LPs.</p></div>
+          </div>
+          <p class="muted" style="font-size:0.72em; margin-top:0.8em;">
+            Quotes from the Uniswap v4 SDK. The right is minted on-chain, not in the UI.
+          </p>
+          <aside class="notes">
+            Live: swap → bid → hunt. Show donate in tape.
+          </aside>
+        </section>
+
+        <section>
+          <p class="kicker">Integrations</p>
+          <h2>Standing on the v4 stack</h2>
+          <div class="cols-3">
+            <div class="card"><h3>Uniswap v4 core</h3><p>PoolManager · afterSwap · donate · CurrencySettler</p></div>
+            <div class="card"><h3>v4 periphery</h3><p>StateView · PositionManager · Permit2 · SwapRouter</p></div>
+            <div class="card"><h3>Searcher bond</h3><p>Capital at risk to hunt — no anonymous sniping</p></div>
+            <div class="card"><h3>Unichain Sepolia</h3><p>Two-block window is real block time</p></div>
+            <div class="card"><h3>OpenZeppelin</h3><p>uniswap-hooks BaseHook</p></div>
+            <div class="card"><h3>Frontend / SDK</h3><p>@uniswap/v4-sdk · viem · React</p></div>
+          </div>
+        </section>
+
+        <section>
+          <p class="kicker">Why it's profitable</p>
+          <h2>A liquidity <span class="grad">flywheel</span></h2>
+          <div class="cols" style="grid-template-columns: 1.05fr 0.95fr;">
+            <div class="mermaid">
+flowchart TD
+  A["Fill mints a right"] --> B[Searchers bid sbUSD]
+  B --> C[Hunt or expire]
+  C --> D[Bid donated to LPs]
+  D --> E[Higher LP yield]
+  E --> F[More liquidity]
+  F --> G[Larger fills · richer rights]
+  G --> A
+            </div>
+            <div>
+              <ul class="tight" style="font-size:0.82em;">
+                <li><strong>LPs:</strong> collect what used to leak to private searchers.</li>
+                <li><strong>Traders:</strong> no extra delay, no extra tax on the swap.</li>
+                <li><strong>Searchers:</strong> buy a license instead of a gas war.</li>
+                <li><strong>Protocol later:</strong> split on bids — never on retail fees.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section data-background-color="#101410">
+          <p class="kicker">Where this goes</p>
+          <h2>Product surfaces</h2>
+          <div class="cols-3">
+            <div class="card"><h3 class="grad">Size desks</h3><p>Large fills mint rights worth competing for.</p></div>
+            <div class="card"><h3 class="grad">Searcher UX</h3><p>Bid book as a product, not a Telegram group.</p></div>
+            <div class="card"><h3 class="grad">Aggregators</h3><p>Route size here; leftover is already priced.</p></div>
+            <div class="card"><h3 class="grad">Analytics</h3><p>Right tape: mint, bid, hunt, expire.</p></div>
+            <div class="card"><h3 class="grad">MEV split</h3><p>Protocol cut on bids, not users.</p></div>
+            <div class="card"><h3 class="grad">Mainnet window</h3><p>Tune T+2 to chain latency.</p></div>
+          </div>
+        </section>
+
+        <section>
+          <p class="kicker">Why it wins UHI10</p>
+          <h2>Theme: <span class="grad">Sustainable Liquidity &amp; MEV Protection</span></h2>
+          <div class="cols">
+            <div class="card">
+              <h3 style="color:var(--teal)">Sustainability</h3>
+              <p style="color:var(--ink); font-size:0.85em;">LPs earn the bid whether the searcher hunts or not. Residual value stays in the pool.</p>
+            </div>
+            <div class="card">
+              <h3 style="color:var(--indigo)">MEV protection</h3>
+              <p style="color:var(--ink); font-size:0.85em;">The backrun is <strong>auctioned and time-boxed</strong> — not gifted to whoever saw the mempool first.</p>
+            </div>
+          </div>
+          <p style="margin-top: 1em; font-size:0.9em;">
+            One hook, both halves — <span class="grad">license + recapture</span>. Not a Fair Flow clone.
+          </p>
+        </section>
+
+        <section>
+          <p class="kicker">Deployed · Unichain Sepolia (1301)</p>
+          <h2>Try it yourself</h2>
+          <table>
+            <tbody>
+              <tr><td><strong>SoldBackrunHook</strong></td><td class="mono"><a href="https://sepolia.uniscan.xyz/address/0x2F5EC31089512943E9cf06a7F949E445d8E9D0C4">0x2F5E…D0C4</a></td></tr>
+              <tr><td>SearcherBond</td><td class="mono"><a href="https://sepolia.uniscan.xyz/address/0xAaa33009F9E128f00C68A26c64184C8734F533bF">0xAaa3…33bF</a></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top: 1em;">
+            <span class="pill teal">Live · uhi10-sold-backrun.vercel.app</span>
+            <span class="pill indigo">github.com/blue-benz/sold-backrun</span>
+          </div>
+          <aside class="notes">
+            Shared PM 0x00B0…2AC. Hook is live — do not redeploy.
+          </aside>
+        </section>
+
+        <section data-background-color="#07090a" class="center">
+          <p class="kicker center">Sold Backrun</p>
+          <p class="big-quote center" style="max-width: 24ch; margin: 0 auto;">
+            The leftover was always there.<br /><span class="grad">Now LPs get paid for it.</span>
+          </p>
+          <p class="lead" style="max-width: 42ch; margin: 1em auto 0; text-align:center;">
+            Mint the right. Auction the hunt. Donate the bid.
+          </p>
+          <p style="margin-top: 1.4em;">
+            <a href="https://uhi10-sold-backrun.vercel.app">uhi10-sold-backrun.vercel.app</a>
+            &nbsp;·&nbsp;
+            <a href="https://github.com/blue-benz/sold-backrun">GitHub</a>
+          </p>
+          <aside class="notes">Close. Thank the judges.</aside>
+        </section>
+
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "base",
+        themeVariables: {
+          background: "transparent",
+          primaryColor: "#101410",
+          primaryTextColor: "#eef6ea",
+          primaryBorderColor: "#7c8bff",
+          lineColor: "#c6ff3d",
+          secondaryColor: "#101410",
+          tertiaryColor: "#101410",
+          fontFamily: "Inter, sans-serif",
+          fontSize: "16px",
+          actorBkg: "#101410",
+          actorBorder: "#7c8bff",
+          actorTextColor: "#eef6ea",
+          signalColor: "#a8b6a4",
+          signalTextColor: "#eef6ea",
+          noteBkgColor: "#1a2214",
+          noteTextColor: "#eef6ea",
+        },
+      });
+      Reveal.initialize({
+        hash: true, slideNumber: "c/t", transition: "slide", transitionSpeed: "fast",
+        backgroundTransition: "fade", width: 1280, height: 720, margin: 0.06,
+        controls: true, progress: true, plugins: [RevealNotes],
+      });
+    </script>
+  </body>
+</html>
