@@ -105,6 +105,16 @@ body::before {
   white-space: nowrap;
   overflow: hidden;
 }
+.tape {
+  max-height: 720px;
+}
+.stat-value.fair {
+  text-shadow: 0 0 18px color-mix(in srgb, var(--fair) 55%, transparent);
+}
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-40%); }
+}
 .pit-head {
   display: flex;
   justify-content: space-between;

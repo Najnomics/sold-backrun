@@ -61,8 +61,8 @@ export function Overview() {
             <Link to="/swap" className="btn btn-primary">
               <IconSwap /> Post a right
             </Link>
-            <Link to="/analytics" className="btn btn-outline">
-              <IconChart /> Tape
+            <Link to="/agent" className="btn btn-outline">
+              Agent desk
             </Link>
           </div>
         </div>

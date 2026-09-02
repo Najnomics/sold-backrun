@@ -106,6 +106,16 @@ export async function readPolicy(): Promise<PolicyState> {
   return { fairUntilBlock: fairUntilBlock as bigint, fairNow: fairNow as boolean, block };
 }
 
+const backrunPostedEvent = {
+  type: "event",
+  name: "BackrunPosted",
+  inputs: [
+    { name: "rightId", type: "uint256", indexed: true },
+    { name: "poolId", type: "bytes32", indexed: true },
+    { name: "expiry", type: "uint256", indexed: false },
+  ],
+} as const;
+
 const backrunSoldEvent = {
   type: "event",
   name: "BackrunSold",
@@ -137,14 +147,23 @@ let scannedTo: bigint | null = null;
 
 async function fetchSwapLogs(from: bigint, to: bigint) {
   try {
-    return await logsClient.getLogs({
-      address: addresses.hook,
-      event: backrunSoldEvent,
-      fromBlock: from,
-      toBlock: to,
-    });
+    const [sold, posted] = await Promise.all([
+      logsClient.getLogs({
+        address: addresses.hook,
+        event: backrunSoldEvent,
+        fromBlock: from,
+        toBlock: to,
+      }),
+      logsClient.getLogs({
+        address: addresses.hook,
+        event: backrunPostedEvent,
+        fromBlock: from,
+        toBlock: to,
+      }),
+    ]);
+    return { sold, posted };
   } catch {
-    return [];
+    return { sold: [], posted: [] };
   }
 }
 
@@ -162,9 +181,22 @@ export async function readSwapEvents(limit = 12): Promise<SwapEvent[]> {
 
   for (let lo = from; lo <= head; lo += LOG_CHUNK) {
     const hi = lo + LOG_CHUNK - 1n > head ? head : lo + LOG_CHUNK - 1n;
-    const logs = await fetchSwapLogs(lo, hi);
-    for (const l of logs) {
-      const key = `${l.transactionHash}:${l.logIndex}`;
+    const { sold, posted } = await fetchSwapLogs(lo, hi);
+    for (const l of posted) {
+      const key = `${l.transactionHash}:${l.logIndex}:post`;
+      eventCache.set(key, {
+        attested: true,
+        fee: 500,
+        taxAmount: 0n,
+        taxCurrency: addresses.token0,
+        sender: ZERO,
+        block: l.blockNumber ?? 0n,
+        txHash: l.transactionHash as Hex,
+        logIndex: l.logIndex ?? 0,
+      });
+    }
+    for (const l of sold) {
+      const key = `${l.transactionHash}:${l.logIndex}:sold`;
       const bid = (l.args.bid ?? 0n) as bigint;
       const surplus = (l.args.surplus ?? 0n) as bigint;
       eventCache.set(key, {

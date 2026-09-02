@@ -24,6 +24,9 @@ const AnalyticsPage = lazy(() =>
 const AttestationPage = lazy(() =>
   import("./pages/AttestationPage").then((m) => ({ default: m.AttestationPage })),
 );
+const AgentPage = lazy(() =>
+  import("./pages/AgentPage").then((m) => ({ default: m.AgentPage })),
+);
 const AboutPage = lazy(() =>
   import("./pages/AboutPage").then((m) => ({ default: m.AboutPage })),
 );
@@ -42,6 +45,7 @@ function Root() {
                 <Route path="liquidity" element={<LiquidityPage />} />
                 <Route path="analytics" element={<AnalyticsPage />} />
                 <Route path="attestation" element={<AttestationPage />} />
+                <Route path="agent" element={<AgentPage />} />
                 <Route path="about" element={<AboutPage />} />
                 <Route path="*" element={<NotFound />} />
               </Route>

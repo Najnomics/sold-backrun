@@ -42,8 +42,8 @@ export function AnalyticsPage() {
   }, [events]);
 
   const split = [
-    { name: "Attested", value: attested.length, color: FAIR },
-    { name: "Toxic", value: toxic.length, color: TOXIC },
+    { name: "Rights posted", value: attested.length, color: FAIR },
+    { name: "Backruns sold", value: toxic.length, color: TOXIC },
   ];
   const hasSplit = attested.length + toxic.length > 0;
 
@@ -56,12 +56,12 @@ export function AnalyticsPage() {
           <span className="stat-sub">{taxCurrency ? symbolFor(taxCurrency) : "to LPs"}</span>
         </div>
         <div className="stat">
-          <span className="stat-label">Attested fills</span>
+          <span className="stat-label">Rights posted</span>
           <span className="stat-value fair">{attested.length}</span>
           <span className="stat-sub">low retail fee</span>
         </div>
         <div className="stat">
-          <span className="stat-label">Toxic fills taxed</span>
+          <span className="stat-label">Backruns sold</span>
           <span className="stat-value toxic">{toxic.length}</span>
           <span className="stat-sub">premium + recapture</span>
         </div>
@@ -140,8 +140,8 @@ export function AnalyticsPage() {
                 </PieChart>
               </ResponsiveContainer>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <Legend color={FAIR} label="Attested" value={attested.length} />
-                <Legend color={TOXIC} label="Toxic" value={toxic.length} />
+                <Legend color={FAIR} label="Rights" value={attested.length} />
+                <Legend color={TOXIC} label="Sold" value={toxic.length} />
               </div>
             </div>
           )}
@@ -152,7 +152,7 @@ export function AnalyticsPage() {
         <div className="card-head">
           <div>
             <h2>Live flow tape</h2>
-            <span className="muted">BackrunSold events, newest first</span>
+            <span className="muted">BackrunPosted + BackrunSold, newest first</span>
           </div>
           <Link to="/swap" className="btn btn-ghost">
             Generate flow
@@ -165,9 +165,9 @@ export function AnalyticsPage() {
         ) : (
           <ul className="tape">
             {events.map((e) => (
-              <li key={e.txHash} className={`row ${e.attested ? "fair" : "toxic"}`}>
+              <li key={`${e.txHash}:${e.logIndex}`} className={`row ${e.attested ? "fair" : "toxic"}`}>
                 <span className={`tag ${e.attested ? "fair" : "toxic"}`}>
-                  {e.attested ? "ATTESTED" : "BACKRUN"}
+                  {e.attested ? "RIGHT" : "SOLD"}
                 </span>
                 <span>{feePct(e.fee)}</span>
                 <span className="row-tax">

@@ -13,5 +13,6 @@
   "token0Symbol": "sbUSD",
   "token1Symbol": "sbVOL",
   "fee": 8388608,
-  "tickSpacing": 60
+  "tickSpacing": 60,
+  "agent": "0xDA885ae01E18A34E0351c4C968F764000E5111c4"
 }

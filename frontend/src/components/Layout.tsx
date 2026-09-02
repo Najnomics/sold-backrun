@@ -7,6 +7,7 @@ import { faucet } from "../lib/actions";
 import { fmt, short } from "../lib/format";
 import {
   IconBook,
+  IconBolt,
   IconChart,
   IconDrop,
   IconHome,
@@ -20,6 +21,7 @@ const NAV = [
   { to: "/liquidity", label: "LP", icon: IconDrop },
   { to: "/analytics", label: "TAPE", icon: IconChart },
   { to: "/attestation", label: "BOND", icon: IconShield },
+  { to: "/agent", label: "AGT", icon: IconBolt },
   { to: "/about", label: "SPEC", icon: IconBook },
 ];
 

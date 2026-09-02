@@ -31,6 +31,13 @@ export function AboutPage() {
               <code>BackrunSold</code> is the analytics tape.
             </li>
           </ul>
+          <h3>Agents</h3>
+          <p>
+            The auction window is two blocks. An off-chain bot that bids in a
+            later transaction will miss it. <b>BackrunAgent.hunt()</b> posts the
+            retail swap, bids, and fills in one transaction. Cursor agents,
+            solvers, or a cron keeper all call the same function.
+          </p>
         </div>
       </section>
 
