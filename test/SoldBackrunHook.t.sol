@@ -145,4 +145,97 @@ contract SoldBackrunHookTest is BaseTest {
         vm.expectRevert();
         poolManager.initialize(staticKey, Constants.SQRT_PRICE_1_1);
     }
+
+    function test_bidRefundsPrevious() public {
+        address rival = address(0x1111);
+        deal(Currency.unwrap(currency1), rival, 50e18);
+        vm.startPrank(rival);
+        IERC20(Currency.unwrap(currency1)).approve(address(bonds), type(uint256).max);
+        IERC20(Currency.unwrap(currency1)).approve(address(hook), type(uint256).max);
+        bonds.bond(5e18);
+        vm.stopPrank();
+
+        _retail();
+        vm.prank(searcher);
+        bonds.bond(5e18);
+        vm.prank(searcher);
+        hook.bid(1, 2e18);
+        uint256 before = IERC20(Currency.unwrap(currency1)).balanceOf(searcher);
+        vm.prank(rival);
+        hook.bid(1, 3e18);
+        assertEq(IERC20(Currency.unwrap(currency1)).balanceOf(searcher), before + 2e18);
+        (,, address winner, uint256 bidAmt,,) = hook.rights(1);
+        assertEq(winner, rival);
+        assertEq(bidAmt, 3e18);
+    }
+
+    function test_bidTooLowReverts() public {
+        _retail();
+        vm.prank(searcher);
+        bonds.bond(5e18);
+        vm.prank(searcher);
+        hook.bid(1, 2e18);
+        vm.prank(searcher);
+        vm.expectRevert(SoldBackrunHook.BidTooLow.selector);
+        hook.bid(1, 2e18);
+    }
+
+    function test_unknownRightReverts() public {
+        vm.expectRevert(SoldBackrunHook.UnknownRight.selector);
+        hook.bid(99, 1e18);
+    }
+
+    function test_zeroBidReverts() public {
+        _retail();
+        vm.expectRevert(SoldBackrunHook.ZeroAmount.selector);
+        hook.bid(1, 0);
+    }
+
+    function test_expiredBidReverts() public {
+        _retail();
+        vm.prank(searcher);
+        bonds.bond(5e18);
+        vm.roll(block.number + 3);
+        vm.prank(searcher);
+        vm.expectRevert(SoldBackrunHook.Expired.selector);
+        hook.bid(1, 2e18);
+    }
+
+    function test_shortHookDataReverts() public {
+        _retail();
+        vm.expectRevert();
+        swapRouter.swapExactTokensForTokens({
+            amountIn: 1e18,
+            amountOutMin: 0,
+            zeroForOne: false,
+            poolKey: poolKey,
+            hookData: abi.encode(SoldBackrunHook.Kind.BackrunFill, uint256(1)),
+            receiver: address(this),
+            deadline: block.timestamp + 1
+        });
+    }
+
+    function test_fillAfterFillReverts() public {
+        _retail();
+        vm.prank(searcher);
+        bonds.bond(5e18);
+        vm.prank(searcher);
+        hook.bid(1, 2e18);
+        bytes memory data = abi.encode(SoldBackrunHook.Kind.BackrunFill, uint256(1), searcher);
+        swapRouter.swapExactTokensForTokens({
+            amountIn: 5e18, amountOutMin: 0, zeroForOne: false, poolKey: poolKey,
+            hookData: data, receiver: address(this), deadline: block.timestamp + 1
+        });
+        vm.expectRevert();
+        swapRouter.swapExactTokensForTokens({
+            amountIn: 1e18, amountOutMin: 0, zeroForOne: false, poolKey: poolKey,
+            hookData: data, receiver: address(this), deadline: block.timestamp + 1
+        });
+    }
+
+    function test_permissions() public {
+        Hooks.Permissions memory p = hook.getHookPermissions();
+        assertTrue(p.afterSwapReturnDelta);
+        assertFalse(p.beforeSwapReturnDelta);
+    }
 }

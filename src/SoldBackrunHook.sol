@@ -184,10 +184,6 @@ contract SoldBackrunHook is BaseHook, ReentrancyGuard {
 
     function _decode(bytes calldata hookData) internal pure returns (Kind kind, uint256 rightId, address searcher) {
         if (hookData.length == 0) return (Kind.Retail, 0, address(0));
-        if (hookData.length == 64) {
-            (kind, rightId) = abi.decode(hookData, (Kind, uint256));
-            return (kind, rightId, address(0));
-        }
         if (hookData.length != 96) revert BadHookData();
         return abi.decode(hookData, (Kind, uint256, address));
     }
