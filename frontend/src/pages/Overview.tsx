@@ -23,34 +23,49 @@ export function Overview() {
 
   return (
     <div className="grid" style={{ gap: 22 }}>
-      <section className="hero">
-        <span className="hero-eyebrow">● UHI10 · Sustainable Liquidity & MEV Protection</span>
-        <h1>
-          Retail sells the <span className="grad">backrun</span>.
-        </h1>
-        <p>
-          Sold Backrun is a Uniswap v4 hook where a retail swap mints an exclusive
-          backrun right. Bonded searchers bid in ERC-20; the winner fills through
-          hookData. The bid plus a surplus skim is{" "}
-          <b>donated to in-range LPs</b> — so the backrun pays the pool, not the
-          searcher.
-        </p>
-        <div className="hero-cta">
-          <Link to="/swap" className="btn btn-primary">
-            <IconSwap /> Try a swap
-          </Link>
-          <Link to="/analytics" className="btn btn-outline">
-            <IconChart /> See the flow
-          </Link>
-          <Link to="/about" className="btn btn-outline">
-            How it works
-          </Link>
+      <section className="hero pit-board">
+        <div className="pit-quotes">
+          <div>
+            <span>RETAIL</span>
+            <b>POST RIGHT</b>
+          </div>
+          <div>
+            <span>BID</span>
+            <b>ERC-20 1ST PRICE</b>
+          </div>
+          <div>
+            <span>FILL</span>
+            <b>WINNER ONLY</b>
+          </div>
+          <div>
+            <span>PAYOUT</span>
+            <b>BID + SKIM → LP</b>
+          </div>
+          <svg className="hero-flow" viewBox="0 0 380 160">
+            <path d="M0 80 C 90 80 90 20 190 20 S 290 140 380 140" stroke="#111" />
+            <path d="M0 120 C 90 120 90 40 190 40 S 290 20 380 20" stroke="#111" />
+          </svg>
         </div>
-        <svg className="hero-flow" viewBox="0 0 380 260">
-          <path d="M0 200 C 90 200 90 80 190 80 S 290 200 380 200" stroke="#34e1a4" />
-          <path d="M0 230 C 90 230 90 130 190 130 S 290 30 380 30" stroke="#7c8bff" />
-          <path d="M0 160 C 90 160 90 40 190 40 S 290 160 380 160" stroke="#ff5f6d" opacity="0.6" />
-        </svg>
+        <div className="pit-copy">
+          <span className="hero-eyebrow">PIT · UHI10 · UNICHAIN SEPOLIA</span>
+          <h1>
+            Retail sells the <span className="grad">backrun</span>.
+          </h1>
+          <p>
+            Sold Backrun is a Uniswap v4 hook where a retail swap mints an exclusive
+            backrun right. Bonded searchers bid in ERC-20; the winner fills through
+            hookData. The bid plus a surplus skim is donated to in-range LPs — so
+            the backrun pays the pool, not the searcher.
+          </p>
+          <div className="hero-cta">
+            <Link to="/swap" className="btn btn-primary">
+              <IconSwap /> Post a right
+            </Link>
+            <Link to="/analytics" className="btn btn-outline">
+              <IconChart /> Tape
+            </Link>
+          </div>
+        </div>
       </section>
 
       <section className="grid cols-4">
@@ -197,7 +212,7 @@ function QuickActions() {
             <QuickCard
               icon={<IconCoins />}
               title="Get test tokens"
-              body="Mint 10,000 ffVOL + ffUSD to your wallet."
+              body="Mint 10,000 sbVOL + sbUSD to your wallet."
               action="Faucet"
               busy={busy === "Minted test tokens"}
               disabled={!!busy}

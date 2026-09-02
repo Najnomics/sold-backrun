@@ -1,0 +1,216 @@
+:root {
+  --bg: #070806;
+  --bg-1: #0c0e09;
+  --bg-2: #11140c;
+  --surface: #12160d;
+  --surface-2: #181d11;
+  --surface-3: #1f2616;
+  --line: #2c351c;
+  --line-2: #3d4a24;
+  --text: #e8f0d4;
+  --text-2: #a8b888;
+  --muted: #6d7a52;
+  --fair: #d6ff3f;
+  --fair-2: #eaff80;
+  --fair-dim: #2a3308;
+  --toxic: #ff5a1f;
+  --toxic-2: #ff8a55;
+  --toxic-dim: #3a1608;
+  --accent: #ffbf00;
+  --accent-2: #ffd54a;
+  --gold: #ffbf00;
+  --radius: 0;
+  --radius-lg: 0;
+  --radius-sm: 0;
+  --shadow: none;
+  --shadow-sm: none;
+  --glow-fair: 0 0 18px rgba(214, 255, 63, 0.25);
+  --glow-toxic: 0 0 18px rgba(255, 90, 31, 0.25);
+  --font: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: "Syne", "Arial Black", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --sidebar-w: 76px;
+}
+
+body::before {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(214, 255, 63, 0.015) 3px,
+    rgba(214, 255, 63, 0.015) 4px
+  );
+}
+
+.pit-app {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  min-height: 100vh;
+}
+.pit-rail {
+  background: #050604;
+  border-right: 1px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 6px;
+  gap: 6px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.pit-mark {
+  width: 44px;
+  height: 44px;
+  background: var(--accent);
+  color: #111;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.72rem;
+  margin-bottom: 10px;
+}
+.pit-ico {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 0;
+  color: var(--muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+}
+.pit-ico svg {
+  width: 18px;
+  height: 18px;
+}
+.pit-ico.on,
+.pit-ico:hover {
+  color: var(--fair);
+  background: var(--fair-dim);
+}
+.pit-stage {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pit-ticker {
+  background: var(--accent);
+  color: #111;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 7px 14px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.pit-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-1);
+}
+.pit-kicker {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+.pit-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+.pit-tools {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.pit-foot {
+  padding: 10px 22px;
+  border-top: 1px solid var(--line);
+  font-size: 0.72rem;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn,
+.card,
+.card-lg,
+.chip,
+.io,
+.corridor,
+.stat,
+.cta-band {
+  border-radius: 0 !important;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #111;
+  box-shadow: none;
+}
+.hero,
+.pit-board {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr;
+  gap: 0;
+  border-radius: 0;
+  border: 2px solid var(--fair);
+  background: #050604;
+  padding: 0;
+  overflow: hidden;
+}
+.hero-flow {
+  position: static;
+  width: 100%;
+  height: 220px;
+  opacity: 0.9;
+  mix-blend-mode: screen;
+}
+.pit-board .pit-copy,
+.hero > :not(.hero-flow) {
+  padding: 28px 24px;
+}
+.pit-quotes {
+  background: var(--fair);
+  color: #111;
+  padding: 22px 18px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+.pit-quotes div {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #111;
+  padding: 8px 0;
+}
+.hero h1 .grad {
+  background: none;
+  color: var(--fair);
+  -webkit-text-fill-color: var(--fair);
+}
+.cta-band {
+  background: var(--fair);
+  color: #111;
+}
+.cta-band h2,
+.cta-band p {
+  color: #111;
+}
+
+@media (max-width: 800px) {
+  .pit-app {
+    grid-template-columns: 1fr;
+  }
+  .pit-rail {
+    position: relative;
+    height: auto;
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+  }
+}

@@ -15,8 +15,8 @@ import { Link } from "react-router-dom";
 import { useAppData } from "../context/AppData";
 import { fmt, short, symbolFor, feePct } from "../lib/format";
 
-const FAIR = "#34e1a4";
-const TOXIC = "#ff5f6d";
+const FAIR = "#d6ff3f";
+const TOXIC = "#ff5a1f";
 
 export function AnalyticsPage() {
   const { events, recaptured } = useAppData();
