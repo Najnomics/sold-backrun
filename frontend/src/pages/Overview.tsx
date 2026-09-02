@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAppData } from "../context/AppData";
 import { useToast } from "../context/Toast";
 import { addresses, explorerTx, isLocal } from "../lib/clients";
-import { faucet, incrementFlashblock, mine } from "../lib/actions";
+import { faucet, mine } from "../lib/actions";
 import { compact, fmt, symbolFor } from "../lib/format";
 import {
   IconBolt,
@@ -16,9 +16,9 @@ import {
 } from "../components/icons";
 
 export function Overview() {
-  const { pool, recaptured, events, policy, ready } = useAppData();
-  const attested = events.filter((e) => e.attested).length;
-  const toxic = events.filter((e) => !e.attested).length;
+  const { pool, recaptured, events, ready } = useAppData();
+  const posted = events.filter((e) => e.attested).length;
+  const sold = events.filter((e) => !e.attested).length;
   const taxCurrency = events.find((e) => e.taxAmount > 0n)?.taxCurrency;
 
   return (
@@ -70,38 +70,33 @@ export function Overview() {
 
       <section className="grid cols-4">
         <Stat
-          label="Recaptured for LPs"
+          label="Paid to LPs"
           value={`${fmt(recaptured, 4)}`}
-          sub={taxCurrency ? symbolFor(taxCurrency) : "donated via hook"}
+          sub={taxCurrency ? symbolFor(taxCurrency) : "totalBackrunPaid"}
           tone="fair"
           icon={<IconCoins />}
           loading={!ready}
         />
         <Stat
-          label="Attested fills"
-          value={String(attested)}
-          sub="low retail fee"
+          label="Rights posted"
+          value={String(posted)}
+          sub="retail empty hookData"
           tone="fair"
           icon={<IconShield />}
           loading={!ready}
         />
         <Stat
-          label="Toxic fills taxed"
-          value={String(toxic)}
-          sub="premium + recapture"
+          label="Backruns sold"
+          value={String(sold)}
+          sub="bid + surplus skim"
           tone="toxic"
           icon={<IconBolt />}
           loading={!ready}
         />
         <Stat
-          label="Fair window"
-          value={policy?.fairNow ? "OPEN" : "CLOSED"}
-          sub={
-            policy
-              ? `block ${policy.block.toString()} / until ${policy.fairUntilBlock.toString()}`
-              : "—"
-          }
-          tone={policy?.fairNow ? "fair" : undefined}
+          label="Auction window"
+          value="2 blocks"
+          sub="bid + fill must be atomic"
           icon={<IconLock />}
           loading={!ready}
         />
@@ -165,7 +160,7 @@ export function Overview() {
 }
 
 function QuickActions() {
-  const { signer, needsConnect, connect, policy, refresh } = useAppData();
+  const { signer, needsConnect, connect, refresh } = useAppData();
   const toast = useToast();
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -191,16 +186,16 @@ function QuickActions() {
           <h2>Quick actions</h2>
           <span className="muted">interact with the live hook right here</span>
         </div>
-        <span className={`pill ${policy?.fairNow ? "fair" : "toxic"}`}>
-          <span className="dot" /> {policy?.fairNow ? "fair window open" : "toxic pricing"}
+        <span className="pill fair">
+          <span className="dot" /> AUCTION_WINDOW = 2
         </span>
       </div>
 
       {needsConnect ? (
         <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
           <p className="lead" style={{ fontSize: "0.9rem", margin: 0, flex: 1 }}>
-            Connect a wallet on Unichain Sepolia to mint test tokens, pulse the
-            TEE oracle, and swap.
+            Connect a wallet on Unichain Sepolia to mint test{" "}
+            {addresses.token0Symbol} + {addresses.token1Symbol} and swap.
           </p>
           <button className="btn btn-primary" onClick={connect}>
             Connect wallet
@@ -223,21 +218,15 @@ function QuickActions() {
           )}
           <QuickCard
             icon={<IconShield />}
-            title="Pulse TEE heartbeat"
-            body="Owner-gated builder incrementFlashblock — not a mock fair window."
-            action="incrementFlashblock"
-            busy={busy === "TEE heartbeat"}
-            disabled={!!busy}
-            onClick={() =>
-              run("TEE heartbeat", () =>
-                incrementFlashblock(signer!.owner, signer!.wc),
-              )
-            }
+            title="Open the agent desk"
+            body="Same-block hunt(): retail, bid, and fill. The two-block auction cannot wait for a second tx."
+            action="Agent desk"
+            to="/agent"
           />
           <QuickCard
             icon={<IconSwap />}
-            title="Swap through a corridor"
-            body="Compare attested vs public pricing side by side."
+            title="Post a retail right"
+            body="Empty hookData mints BackrunPosted. The agent fills the other leg."
             action="Go to Swap"
             to="/swap"
           />
@@ -363,9 +352,9 @@ function FeeSchedule() {
 function Integrations() {
   const items = [
     ["Uniswap v4", "PoolManager, dynamic fees, donate, StateView, PositionManager"],
-    ["Flashbots Flashtestations", "Builder attestation source (production policy seam)"],
-    ["Unichain", "BlockBuilderPolicy + the deployment target (Sepolia 1301)"],
-    ["Permit2", "Token approvals for router and position manager"],
+    ["SearcherBond", "Min-bond eligibility; delayed unbond; hook-only slash"],
+    ["BackrunAgent", "Atomic hunt() so the 2-block window cannot expire"],
+    ["Unichain Sepolia", "Live hook, sbUSD/sbVOL book, Uniscan tape"],
   ];
   return (
     <section className="card card-lg">
@@ -397,7 +386,7 @@ function Faq() {
     ],
     [
       "How do I bid?",
-      "Bond first, then call bid(rightId, amount) on the hook. This console v1 posts rights via retail swap but does not include a bid form.",
+      "Bond on SearcherBond, then bid(rightId, amount) before expiry. The live BackrunAgent does that inside hunt() in the same block.",
     ],
     [
       "Where does the recaptured value go?",
@@ -430,7 +419,7 @@ function CtaBand() {
     <section className="cta-band">
       <div>
         <h2>Mint the right. Let LPs collect the bid.</h2>
-        <p>Swap as retail to post a backrun right. Bonded searchers bid off-console in v1.</p>
+        <p>Swap as retail to post a right, or open the agent desk to see live hunt() fills.</p>
       </div>
       <div className="cta-actions">
         <Link to="/swap" className="btn btn-primary">

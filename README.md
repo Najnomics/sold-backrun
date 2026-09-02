@@ -18,7 +18,7 @@ Today, a retail swap moves the pool. A searcher backruns it for free (or sandwic
 Sold Backrun inverts that:
 
 1. `afterSwap` **mints a backrun right** for this pool, this tick, this size.
-2. Bonded searchers **bid** for that right in the same unlock or the next flashblock.
+2. Bonded searchers **bid** for that right (`AUCTION_WINDOW = 2` blocks). On a live chain, bid and fill must be atomic (`BackrunAgent.hunt()`).
 3. The winner's **bid plus captured arb** settle to the hook and are **`donate`d to in-range LPs**.
 4. A sandwich is unprofitable because the leftover arb is **already sold**.
 
@@ -37,22 +37,23 @@ It is Atrium's own UHI10 one-liner, productized: capture arb around the swap, ro
 
 The hook never NoOps the retail swap. Retail always fills against the AMM. The hook's job is the **option that retail just created**.
 
-1. **`beforeSwap`** — optional: tag the swap as `retail` vs `backrunFill` via `hookData`. Backrun fills are only valid if they hold the current right.
-2. **`afterSwap` (retail)** — compute a backrun spec (pool, tick after swap, notional, expiry = this unlock or next flashblock). Open an auction.
-3. **Searcher `bid(rightId, amount)`** — bonded searchers raise. Highest bid at expiry wins.
-4. **Winner `fillBackrun(rightId, params)`** — a second swap (or a same-unlock swap) that is allowed to move the pool back toward fair value. The hook takes the bid and any surplus vs the spec, then `donate`s to LPs.
-5. **Expiry with no bid** — right burns. Pool is no worse than a vanilla AMM.
+1. **`beforeSwap` / `afterSwap`** — empty `hookData` is retail. Fill swaps pass `abi.encode(Kind.BackrunFill, rightId, winner)` (**96 bytes only**).
+2. **`afterSwap` (retail)** — mint a `Right` with `expiry = block.number + AUCTION_WINDOW` (`AUCTION_WINDOW = 2`).
+3. **Searcher `bid(rightId, amount)`** — bonded searchers raise first-price in `SearcherBond.asset()`. Highest bid wins; previous bidder is refunded.
+4. **Winner fill** — a second swap through the same hook with fill `hookData`. The hook takes the bid plus a `SURPLUS_BIPS` skim, then `donate`s to in-range LPs. There is **no** `fillBackrun()` function.
+5. **Expiry** — if `block.number > expiry`, the fill reverts `Expired`. Retail already filled. There is **no** `BackrunExpired` event.
+
+On Unichain Sepolia the two-block window is too tight for a separate bid tx. `BackrunAgent.hunt()` posts retail, bids, and fills **in one transaction**.
 
 ```mermaid
 flowchart TD
-    A[Retail swap executes] --> B["afterSwap: mint BackrunRight"]
+    A[Retail swap executes] --> B["afterSwap: mint Right"]
     B --> C{bonded searcher bids?}
     C -- "yes" --> D[Highest bid wins]
-    D --> E["Winner fillBackrun()"]
-    E --> F["bid + surplus → donate to in-range LPs"]
-    C -- "no bid by expiry" --> G[Right burns · vanilla AMM]
+    D --> E["Winner swap with BackrunFill hookData"]
+    E --> F["bid + surplus skim → donate to in-range LPs"]
+    C -- "no bid by expiry" --> G[Fill reverts Expired · vanilla AMM]
     F --> H[emit BackrunSold]
-    G --> I[emit BackrunExpired]
 ```
 
 ```mermaid
@@ -69,22 +70,21 @@ Keep v1 **simple enough to demo in five minutes**. Not an EigenLayer AVS. Not a 
 
 | Field | v1 choice | Why |
 |---|---|---|
-| Auction type | First-price, same-unlock / next-flashblock | Demoable; Flashblocks make "next slot" real on Unichain |
-| Eligibility | `bonds[searcher] >= MIN_BOND` | Same bond primitive as Fair Path corridor 3; copy the ledger, do not import the fee engine |
-| Reserve | `0` in demo; optional `minBid` later | Empty auctions must not brick retail |
-| Settlement | Bid in token1 (or pool native) | One asset on the tape |
-| Surplus | `max(0, arbProfit - bid)` also donated | LPs get bid **and** leftover |
-| Failure | Right expires; retail already filled | Retail is never held hostage |
+| Auction type | First-price ERC-20; `AUCTION_WINDOW = 2` blocks | Tight on purpose: keepers must bid+fill atomically |
+| Eligibility | `bondedOf >= minBond` | `SearcherBond`; hook-only slash |
+| Reserve | `0` | Empty auctions must not brick retail |
+| Settlement | Bid in sbUSD (token0 / bond asset) | Donate can settle into the book |
+| Surplus | `SURPLUS_BIPS` (50) skim on the winner fill | LPs get bid **and** leftover |
+| Failure | Right expires (`block.number > expiry`); retail already filled | Retail is never held hostage |
 
 ```solidity
-struct BackrunRight {
+struct Right {
     PoolId poolId;
-    int24 tickAfter;
-    uint256 notional;
-    uint256 expiry;       // block or flashblock index
+    uint256 expiry;
     address winner;
     uint256 bid;
     bool filled;
+    bool exists;
 }
 ```
 
@@ -135,7 +135,7 @@ sequenceDiagram
 | `AUCTION_WINDOW` | Blocks or flashblock slots until expiry |
 | `totalBackrunPaid[poolId]` | Cumulative bid + surplus donated |
 | `rights[rightId]` | Live / filled / expired spec |
-| `BackrunPosted` / `BackrunBid` / `BackrunSold` / `BackrunExpired` | Tape for the console |
+| `BackrunPosted` / `BackrunBid` / `BackrunSold` | Tape for the console |
 
 ## Why this is not a sandwich
 
@@ -147,13 +147,13 @@ A sandwich is: front-run, victim, back-run. Sold Backrun **does not sell the fro
 |---|---|---|
 | **Uniswap v4 core** | `PoolManager`, `donate`, `CurrencySettler` | Exclusive fill + LP payout |
 | **OpenZeppelin** | `uniswap-hooks` `BaseHook` | Hook base |
-| **Unichain** | Flashblocks (optional) | "Next slot" expiry that is faster than a full block |
-| **Frontend / SDK** | `viem`, React, `@uniswap/v4-sdk` | Retail swap, live auction card, searcher bid, LP pot |
+| **Unichain** | Sepolia deployment | Live hook, 2-block auction, `BackrunAgent.hunt()` |
+| **Frontend / SDK** | `viem`, React, `@uniswap/v4-sdk` | Retail swap, tape (`BackrunPosted` / `BackrunSold`), agent desk |
 
 **Partner integrations (hookathon README requirement)**
 
-- Unichain Flashblocks — optional expiry clock (`IFlashblockOracle`). Demo uses block-based expiry so the bench runs on Anvil.
-- No Flashbots Protect integration is claimed here (that is Surplus Sink). No CoW Protocol. No Fhenix. No EigenLayer AVS.
+- Unichain Sepolia Uniswap v4 periphery (PoolManager, Universal Router, PositionManager).
+- Expiry is `block.number + AUCTION_WINDOW`. There is no flashblock oracle in this hook.
 
 ## Why it's profitable — as an idea and a business
 
@@ -184,43 +184,36 @@ flowchart LR
 - Not a CoW matcher.
 - Not "we detect all sandwiches." We make the backrun a scarce right.
 
-## The console (to be built)
+## The console
 
-Judge path — three clicks:
+Live: **https://uhi10-sold-backrun.vercel.app** · Agent: **https://uhi10-sold-backrun.vercel.app/agent**
 
-1. **Retail swap** — pool moves; `BackrunPosted` appears on the tape.
-2. **Searcher bid** — auction card; bond if needed; bid lands.
-3. **Fill** — LP pot ticks up by bid + surplus. Optional fourth click: attempt a sandwich; it cannot take the sold right.
+Retail swap posts a right. `BackrunAgent.hunt()` posts, bids, and fills in one transaction because a two-block window cannot wait for a second mempool hop.
 
-Pages: Overview, Retail Swap, Auction, Searcher Bond, Analytics.
+## Testing
 
-## Testing (to be built)
+`forge test` — retail post, bid/refund, unauthorized fill, expiry, fork smoke.
 
-- **Unit** — mint on retail `afterSwap`; reject backrun fill from non-winner; expire with no bid; donate = bid + surplus; retail never reverts because the auction is empty.
-- **Integration** — two searchers raise; winner fills; loser cannot fill.
-- **Fuzz** — surplus donated is never negative; `totalBackrunPaid` equals sum of closed rights.
-- **Adversarial** — same-unlock sandwich from a third address; right still exclusive to winner.
-
-## Repository layout (target)
+## Repository layout
 
 ```
 src/
   SoldBackrunHook.sol
-  BackrunAuction.sol
   SearcherBond.sol
-  interfaces/IBackrunAuction.sol
+  BackrunAgent.sol
 test/
   SoldBackrunHook.t.sol
-  BackrunAuction.t.sol
 frontend/
-  src/pages/{Overview,Swap,Auction,Bond,Analytics}*
+script/
+  DeployUnichain.s.sol
+  PopulateTraffic.s.sol
 ```
 
 ## Hookathon gates
 
 - Public repo (this repository)
 - Valid Uniswap v4 hook
-- Functioning frontend that calls the hook
+- Functioning frontend: https://uhi10-sold-backrun.vercel.app
 - README partner integrations: Unichain Flashblocks (optional seam + Anvil expiry). No theoretical partners.
 - Video: retail swap → bid → fill → LP pot, then a failed sandwich, no AI voice
 - Original work for UHI10; not a resubmission of Fair Flow

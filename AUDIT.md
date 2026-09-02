@@ -7,3 +7,9 @@ See Fair Path `AUDIT.md` for the shared v4 rules. This repo’s extra fixes:
 - Bid + surplus donate on the winner fill.
 
 Tests: retail post, bid/refund, unauthorized fill, expiry, fork smoke.
+
+## Residual (accepted)
+
+- Fill `hookData` names a winner address; it is not an ECDSA identity.
+- `BackrunAgent.hunt()` is permissionless on Sepolia and can spend the agent’s inventory. That is a demo keeper, not a production access-control model.
+- `AUCTION_WINDOW = 2` means sequential mempool bid/fill txs will miss; atomic `hunt()` is required on a live chain.

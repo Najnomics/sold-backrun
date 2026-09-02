@@ -1,118 +1,65 @@
-import { useState } from "react";
-import { useAppData } from "../context/AppData";
-import { useToast } from "../context/Toast";
-import { addresses, explorerTx, isLocal, isZero } from "../lib/clients";
-import { incrementFlashblock, mine } from "../lib/actions";
+import { addresses, explorerAddress, isZero } from "../lib/clients";
 import { short } from "../lib/format";
+import { Link } from "react-router-dom";
 
 export function AttestationPage() {
-  const { policy, signer, needsConnect, connect, refresh } = useAppData();
-  const toast = useToast();
-  const [busy, setBusy] = useState<string | null>(null);
-
-  const fair = policy?.fairNow ?? false;
-  const oracle = !isZero(addresses.oracle) ? addresses.oracle : addresses.policy;
-  const configured = !isZero(oracle);
-
-  async function pulse() {
-    if (!signer) return;
-    setBusy("incrementFlashblock…");
-    try {
-      const hash = await incrementFlashblock(signer.owner, signer.wc);
-      if (isLocal) await mine(1);
-      toast.ok("TEE builder heartbeat — flashblock incremented", explorerTx(hash));
-      await refresh();
-    } catch (e) {
-      toast.err((e as Error).message.slice(0, 120));
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function advance(n: number) {
-    setBusy(`Mining ${n} blocks…`);
-    try {
-      await mine(n);
-      toast.info(`Mined ${n} blocks`);
-      await refresh();
-    } catch (e) {
-      toast.err((e as Error).message.slice(0, 120));
-    } finally {
-      setBusy(null);
-    }
-  }
-
+  const bonds = addresses.bonds;
+  const agent = addresses.agent;
   return (
     <div className="grid cols-2" style={{ alignItems: "start" }}>
       <section className="card card-lg">
         <div className="card-head">
           <div>
-            <h2>Attestation oracle</h2>
-            <span className="muted">{configured ? short(oracle) : "not configured"}</span>
+            <h2>Searcher bond</h2>
+            <span className="muted">
+              {isZero(bonds) ? "not configured" : short(bonds)}
+            </span>
           </div>
         </div>
-
-        <div className={`status-big ${fair ? "fair" : "toxic"}`}>
-          <span className="sd" />
-          <div>
-            <strong>{fair ? "FAIR / TEE ACTIVE" : "NO ORACLE HEARTBEAT"}</strong>
-            <small>
-              {policy
-                ? `current block ${policy.block.toString()} · fair until ${policy.fairUntilBlock.toString()}`
-                : "reading oracle…"}
-            </small>
-          </div>
-        </div>
-
         <p className="lead" style={{ fontSize: "0.9rem" }}>
-          Sold Backrun prices via a first-price backrun auction, not a mock fair
-          window. If an oracle is deployed, <code style={{ fontFamily: "var(--font-mono)" }}>incrementFlashblock()</code>{" "}
-          is an owner-gated TEE builder heartbeat with no duration argument.
+          Only addresses with <code style={{ fontFamily: "var(--font-mono)" }}>bondedOf &gt;= minBond</code>{" "}
+          may bid. The bond asset is <b>sbUSD</b> (token0 of this pool), so a
+          winning bid can donate into the same book. Unbond is delayed so a
+          sandwich cannot exit in the same block as the violation.
         </p>
-
-        {needsConnect ? (
-          <button className="btn btn-primary btn-lg" style={{ marginTop: 8 }} onClick={connect}>
-            Connect wallet
-          </button>
-        ) : (
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 8 }}>
-            <button className="btn btn-primary" disabled={!!busy || !configured} onClick={pulse}>
-              {busy ?? "incrementFlashblock"}
-            </button>
-            {isLocal && (
-              <button className="btn btn-outline" disabled={!!busy} onClick={() => advance(1)}>
-                Mine 1 block
-              </button>
-            )}
-          </div>
-        )}
-        {!configured && (
-          <p className="fineprint">
-            This deployment has no oracle/policy in deployed.json. Bond and bid
-            on-chain; retail swaps still post rights.
-          </p>
+        <p className="lead" style={{ fontSize: "0.9rem" }}>
+          This console does not post a bond from the browser. The live{" "}
+          <Link to="/agent">BackrunAgent</Link> is already bonded and calls{" "}
+          <code style={{ fontFamily: "var(--font-mono)" }}>hunt()</code> atomically.
+          You can also <code style={{ fontFamily: "var(--font-mono)" }}>bond</code> from
+          a wallet against the contract below.
+        </p>
+        {explorerAddress(bonds) && (
+          <a className="btn btn-primary" href={explorerAddress(bonds)} target="_blank" rel="noreferrer">
+            Bond contract
+          </a>
         )}
       </section>
-
       <section className="card card-lg">
         <div className="card-head">
           <h2>Lifecycle</h2>
         </div>
         <ol className="steps">
+          <li>Retail swap (empty hookData) mints a right. Expiry is this block + 2.</li>
+          <li>A bonded searcher bids first-price in the bond ERC-20.</li>
           <li>
-            Retail swap (empty hookData) mints a backrun right.
+            Because two blocks is tighter than a second mempool hop,{" "}
+            <code style={{ fontFamily: "var(--font-mono)" }}>BackrunAgent.hunt()</code>{" "}
+            posts, bids, and fills in one transaction.
           </li>
           <li>
-            Bonded searchers <b>bid</b> first-price in the bond ERC-20.
-          </li>
-          <li>
-            Winner fill via hookData donates bid + surplus to LPs.
-          </li>
-          <li>
-            <code style={{ fontFamily: "var(--font-mono)" }}>BackrunSold</code>{" "}
-            feeds the analytics tape as recaptured value.
+            Winner fill donates bid + surplus.{" "}
+            <code style={{ fontFamily: "var(--font-mono)" }}>BackrunSold</code> hits the tape.
           </li>
         </ol>
+        {!isZero(agent) && explorerAddress(agent) && (
+          <p className="fineprint">
+            Live agent {short(agent)} —{" "}
+            <a href={explorerAddress(agent)} target="_blank" rel="noreferrer">
+              Uniscan
+            </a>
+          </p>
+        )}
       </section>
     </div>
   );

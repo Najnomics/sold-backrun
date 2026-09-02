@@ -16,7 +16,6 @@ export function SwapPage() {
 
   const [zeroForOne, setZeroForOne] = useState(true);
   const [amount, setAmount] = useState("100");
-  const [protect, setProtect] = useState(true);
   const [quote, setQuote] = useState<DualQuote | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
@@ -58,7 +57,7 @@ export function SwapPage() {
     return () => clearTimeout(t);
   }, [pool, amountRaw, zeroForOne]);
 
-  const chosen = quote ? (protect ? quote.attested : quote.toxic) : null;
+  const chosen = quote ? quote.attested : null;
 
   async function doSwap() {
     if (!signer || !pool || amountRaw === 0n || !chosen) return;
@@ -170,36 +169,10 @@ export function SwapPage() {
           </div>
         </div>
 
-        <label className="toggle" style={{ marginTop: 14 }}>
-          <input
-            type="checkbox"
-            checked={protect}
-            onChange={(e) => setProtect(e.target.checked)}
-          />
-          <span className="switch" />
-          <span className="toggle-txt">
-            <strong>Retail swap (empty hookData)</strong>
-            <small>
-              Posts a backrun right. Bonded searchers bid off-console; winner
-              fill uses hookData. This console always sends empty hookData.
-            </small>
-          </span>
-        </label>
-
-        {chosen && (
+        {chosen && quote && (
           <div className="savings">
-            {protect ? (
-              <>
-                You keep <b>+{fmt(quote!.savings, 4)} {String(outSym)}</b> versus
-                the public corridor by trading fair.
-              </>
-            ) : (
-              <>
-                This swap donates{" "}
-                <b>{fmt(quote!.toxic.recapture, 4)} {String(outSym)}</b> back to
-                LPs as recapture.
-              </>
-            )}
+            Retail pays <b>5 bps</b>. A winner fill would pay <b>30 bps</b> plus
+            the bid donate — this form always posts the retail right.
           </div>
         )}
 
@@ -209,7 +182,7 @@ export function SwapPage() {
           </button>
         ) : (
           <button
-            className={`btn btn-lg ${protect ? "btn-primary" : "btn-danger"}`}
+            className="btn btn-lg btn-primary"
             style={{ marginTop: 16 }}
             disabled={!chosen || !!busy || amountRaw === 0n}
             onClick={doSwap}
@@ -218,10 +191,10 @@ export function SwapPage() {
           </button>
         )}
         <p className="fineprint">
-          Quotes come from the Uniswap v4 SDK using live pool state. A retail
-          swap mints a backrun right. Bond/bid: stake in SearcherBond, then call{" "}
-          <code style={{ fontFamily: "var(--font-mono)" }}>bid(rightId, amount)</code>{" "}
-          on the hook — not wired in this v1 console.
+          Quotes come from the Uniswap v4 SDK using live pool state. This page
+          always sends empty <code style={{ fontFamily: "var(--font-mono)" }}>hookData</code>.
+          Bid and fill: Agent desk <code style={{ fontFamily: "var(--font-mono)" }}>hunt()</code>{" "}
+          or <code style={{ fontFamily: "var(--font-mono)" }}>bid(rightId, amount)</code> on the hook.
         </p>
       </section>
 
@@ -229,27 +202,25 @@ export function SwapPage() {
         <div className="corridors">
           <Corridor
             kind="attested"
-            selected={protect}
+            selected
             title="Retail"
             fee={quote ? feePct(quote.attested.feePips) : "0.05%"}
             out={quote ? fmt(quote.attested.netOut, 6) : "—"}
             impact={quote ? `${quote.attested.priceImpactPct}%` : "—"}
             recapture="0"
             outSym={String(outSym)}
-            foot="Empty hookData. Mints a backrun right."
-            onClick={() => setProtect(true)}
+            foot="Empty hookData. Mints a backrun right. This form sends this path."
           />
           <Corridor
             kind="toxic"
-            selected={!protect}
+            selected={false}
             title="Backrun fill (searcher)"
             fee={quote ? feePct(quote.toxic.feePips) : "0.30%"}
             out={quote ? fmt(quote.toxic.netOut, 6) : "—"}
             impact={quote ? `${quote.toxic.priceImpactPct}%` : "—"}
             recapture={quote ? fmt(quote.toxic.recapture, 4) : "—"}
             outSym={String(outSym)}
-            foot="Winner hookData. Bid + surplus → LPs. Not sent from this form."
-            onClick={() => setProtect(false)}
+            foot="Winner hookData. Bid + surplus → LPs. Sent by BackrunAgent.hunt(), not this form."
           />
         </div>
 
@@ -258,9 +229,9 @@ export function SwapPage() {
             <h3>Bond / Bid (v1 note)</h3>
           </div>
           <p className="lead" style={{ fontSize: "0.88rem" }}>
-            Bond in the SearcherBond contract, then bid first-price in the bond
-            ERC-20. The winner fills with hookData. This page only posts the
-            retail right (empty hookData). Bid UI ships later.
+            Bond in SearcherBond, then bid first-price in the bond ERC-20. The
+            winner fills with 96-byte hookData. Use the Agent desk{" "}
+            <code>hunt()</code> to do that atomically on Sepolia.
           </p>
         </div>
       </section>
@@ -278,7 +249,6 @@ function Corridor({
   recapture,
   outSym,
   foot,
-  onClick,
 }: {
   kind: "attested" | "toxic";
   selected: boolean;
@@ -289,19 +259,13 @@ function Corridor({
   recapture: string;
   outSym: string;
   foot: string;
-  onClick: () => void;
 }) {
   const cls = kind === "attested" ? "fair" : "toxic";
   return (
-    <div
-      className={`corridor ${cls} ${selected ? "sel" : ""}`}
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-    >
+    <div className={`corridor ${cls} ${selected ? "sel" : ""}`}>
       <div className="corridor-top">
         <span className="corridor-title">{title}</span>
-        <span className={`tag ${cls}`}>{kind === "attested" ? "FAIR" : "TAXED"}</span>
+        <span className={`tag ${cls}`}>{kind === "attested" ? "RETAIL" : "FILL"}</span>
       </div>
       <div className="corridor-fee">
         {fee} <small>swap fee</small>

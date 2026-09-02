@@ -15,9 +15,12 @@ export function AboutPage() {
             in-range LPs.
           </p>
           <p>
-            The live pool is Unichain Sepolia <b>WETH / USDC</b> (18-decimal
-            mocks). The USDC side is the bond asset so winning bids still donate
-            into the pool.
+            The live pool is Unichain Sepolia{" "}
+            <b>
+              {addresses.token0Symbol} / {addresses.token1Symbol}
+            </b>
+            . Token0 is the bond / bid asset so a winning bid donates into this
+            book. These mocks are unique to Sold Backrun.
           </p>
 
           <h3>Mechanism</h3>

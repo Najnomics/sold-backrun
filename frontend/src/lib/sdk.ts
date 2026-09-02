@@ -20,7 +20,7 @@ import { toPoolId } from "./poolId";
 export const CHAIN_ID = chainId;
 const ZERO_HOOK = "0x0000000000000000000000000000000000000000";
 
-/** Fee tiers the FairFlow hook overrides to at runtime. */
+/** Fee tiers this hook overrides at runtime. */
 export const ATTESTED_FEE = 500; // 0.05% retail
 export const TOXIC_FEE = 3_000; // 0.30% backrun fill
 export const TOXIC_TAX_BIPS = 50; // surplus skim on winner fill

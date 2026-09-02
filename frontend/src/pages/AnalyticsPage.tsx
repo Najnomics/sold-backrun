@@ -58,12 +58,12 @@ export function AnalyticsPage() {
         <div className="stat">
           <span className="stat-label">Rights posted</span>
           <span className="stat-value fair">{attested.length}</span>
-          <span className="stat-sub">low retail fee</span>
+          <span className="stat-sub">retail empty hookData</span>
         </div>
         <div className="stat">
           <span className="stat-label">Backruns sold</span>
           <span className="stat-value toxic">{toxic.length}</span>
-          <span className="stat-sub">premium + recapture</span>
+          <span className="stat-sub">bid + surplus skim</span>
         </div>
       </section>
 
@@ -115,7 +115,7 @@ export function AnalyticsPage() {
           <div className="card-head">
             <div>
               <h2>Flow composition</h2>
-              <span className="muted">attested vs toxic fills</span>
+              <span className="muted">rights posted vs backruns sold</span>
             </div>
           </div>
           {!hasSplit ? (
@@ -173,7 +173,7 @@ export function AnalyticsPage() {
                 <span className="row-tax">
                   {e.taxAmount > 0n
                     ? `+${fmt(e.taxAmount, 4)} ${symbolFor(e.taxCurrency)} → LPs`
-                    : "no tax"}
+                    : "listing"}
                 </span>
                 <span className="row-mono">blk {e.block.toString()}</span>
                 <span className="row-mono">{short(e.sender)}</span>
