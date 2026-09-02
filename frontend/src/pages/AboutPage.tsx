@@ -14,6 +14,11 @@ export function AboutPage() {
             <code>hookData</code>. The bid plus a surplus skim is donated to
             in-range LPs.
           </p>
+          <p>
+            The live pool is Unichain Sepolia <b>WETH / USDC</b> (18-decimal
+            mocks). The USDC side is the bond asset so winning bids still donate
+            into the pool.
+          </p>
 
           <h3>Mechanism</h3>
           <ul>

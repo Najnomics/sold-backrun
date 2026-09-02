@@ -40,10 +40,10 @@ contract PopulateTrafficScript is Script {
             key
         );
         agent.arm(80_000 ether);
-        agent.huntMany(4, 22 ether, 18 ether, 3 ether);
-        agent.huntMany(4, 30 ether, 24 ether, 5 ether);
-        agent.hunt(true, 12 ether, 10 ether, 2 ether);
-        agent.hunt(false, 16 ether, 14 ether, 4 ether);
+        agent.huntMany(4, 0.05 ether, 0.04 ether, 3 ether);
+        agent.huntMany(4, 0.08 ether, 0.06 ether, 5 ether);
+        agent.hunt(true, 0.03 ether, 0.02 ether, 2 ether);
+        agent.hunt(false, 0.04 ether, 0.03 ether, 4 ether);
         vm.stopBroadcast();
 
         console2.log("BackrunAgent", address(agent));

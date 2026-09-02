@@ -1,6 +1,6 @@
 {
   "chainId": 1301,
-  "deployBlock": 61508473,
+  "deployBlock": 61531206,
   "hook": "0x2F5EC31089512943E9cf06a7F949E445d8E9D0C4",
   "bonds": "0xAaa33009F9E128f00C68A26c64184C8734F533bF",
   "poolManager": "0x00B036B58a818B1BC34d502D3fE730Db729e62AC",
@@ -9,10 +9,10 @@
   "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
   "stateView": "0x08a96ca60f3bF04A5F1eC4DaEE0572C5676CBe8E",
   "token0": "0x6DA5F7DeD53AaAa1BA851cd90D0F46A760810e3f",
-  "token1": "0xDd41eC4AFd854d79E0eD6055d873476Ca390c147",
-  "token0Symbol": "sbUSD",
-  "token1Symbol": "sbVOL",
+  "token1": "0xb048F114E8cf2B03f1e0447746c0D5Df5F5ec9c6",
+  "token0Symbol": "USDC",
+  "token1Symbol": "WETH",
   "fee": 8388608,
   "tickSpacing": 60,
-  "agent": "0xDA885ae01E18A34E0351c4C968F764000E5111c4"
+  "agent": "0xF91Da401226d2d47a81944e56Dc3ce2D4081D9b5"
 }
