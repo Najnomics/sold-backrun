@@ -5,7 +5,7 @@ import {
   type Address,
   type WalletClient,
 } from "viem";
-import { account, chain, chainId, isLocal, rpcUrl, walletClient } from "./clients";
+import { account, chain, chainId, isDevKey, isLocal, rpcUrl, walletClient } from "./clients";
 
 export type Signer = { owner: Address; wc: WalletClient };
 
@@ -17,10 +17,6 @@ function getEthereum(): Eip1193 | undefined {
   return (globalThis as unknown as { ethereum?: Eip1193 }).ethereum;
 }
 
-/**
- * Provides the active signer. On local Anvil this is the built-in dev account;
- * on live chains (Unichain) it is a connected browser wallet.
- */
 export function useSigner() {
   const [injected, setInjected] = useState<Signer | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +24,10 @@ export function useSigner() {
   const localSigner: Signer | null = isLocal
     ? { owner: account.address, wc: walletClient }
     : null;
-  const signer = localSigner ?? injected;
+  const keySigner: Signer | null = isDevKey
+    ? { owner: account.address, wc: walletClient }
+    : null;
+  const signer = localSigner ?? keySigner ?? injected;
 
   const connect = useCallback(async () => {
     const eth = getEthereum();
@@ -49,7 +48,6 @@ export function useSigner() {
             params: [{ chainId: wantHex }],
           });
         } catch (switchErr) {
-          // 4902 = chain not added to the wallet yet. Add it, then retry.
           const code = (switchErr as { code?: number })?.code;
           if (code === 4902 || code === -32603) {
             try {
@@ -93,6 +91,6 @@ export function useSigner() {
     connect,
     disconnect,
     error,
-    needsConnect: !isLocal && !injected,
+    needsConnect: !isLocal && !isDevKey && !injected,
   };
 }

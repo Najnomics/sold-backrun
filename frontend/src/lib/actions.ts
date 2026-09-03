@@ -2,6 +2,7 @@ import type { Address, Hex, WalletClient } from "viem";
 import {
   account,
   addresses,
+  chain,
   deployBlock,
   isZero,
   logsClient,
@@ -12,6 +13,7 @@ import {
 import {
   erc20Abi,
   hookAbi,
+  permit2Abi,
   policyAbi,
   stateViewAbi,
   swapRouterAbi,
@@ -266,8 +268,10 @@ const GAS = {
   approve: 80_000n,
   swap: 1_500_000n,
   liquidity: 2_500_000n,
-  policy: 120_000n,
+  policy: 250_000n,
   mint: 120_000n,
+  permit2: 80_000n,
+  hunt: 3_000_000n,
 } as const;
 
 async function ensureRouterAllowance(
@@ -287,8 +291,8 @@ async function ensureRouterAllowance(
     abi: erc20Abi,
     functionName: "approve",
     args: [addresses.swapRouter, (1n << 256n) - 1n],
-    account: owner,
-    chain: null,
+    chain,
+    account: wc.account!,
     gas: GAS.approve,
   });
   await publicClient.waitForTransactionReceipt({ hash });
@@ -324,8 +328,8 @@ export async function executeSwap({
       owner,
       BigInt(Math.floor(Date.now() / 1000 + 3600)),
     ],
-    account: owner,
-    chain: null,
+    chain,
+    account: wc.account!,
     gas: GAS.swap,
   });
   await publicClient.waitForTransactionReceipt({ hash });
@@ -341,8 +345,8 @@ export async function incrementFlashblock(
     address: target,
     abi: policyAbi,
     functionName: "incrementFlashblock",
-    account: owner,
-    chain: null,
+    chain,
+    account: wc.account!,
     gas: GAS.policy,
   });
   await publicClient.waitForTransactionReceipt({ hash });
@@ -360,8 +364,8 @@ export async function faucet(
       abi: erc20Abi,
       functionName: "mint",
       args: [owner, amount],
-      account: owner,
-      chain: null,
+      chain,
+      account: wc.account!,
       gas: GAS.mint,
     });
   const h0 = await mintOne(addresses.token0);
@@ -384,13 +388,89 @@ export async function addLiquidity(
   owner: Address = account.address,
   wc: WalletClient = walletClient,
 ): Promise<Hex> {
+  await ensurePosmPermit2(addresses.token0, owner, wc);
+  await ensurePosmPermit2(addresses.token1, owner, wc);
   const hash = await wc.sendTransaction({
     to: addresses.positionManager,
     data: calldata,
     value,
-    account: owner,
-    chain: null,
+    chain,
+    account: wc.account!,
     gas: GAS.liquidity,
+  });
+  await publicClient.waitForTransactionReceipt({ hash });
+  return hash;
+}
+
+async function ensurePosmPermit2(
+  token: Address,
+  owner: Address,
+  wc: WalletClient,
+) {
+  const allowance = (await publicClient.readContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: "allowance",
+    args: [owner, addresses.permit2],
+  })) as bigint;
+  if (allowance < 10n ** 30n) {
+    const hash = await wc.writeContract({
+      address: token,
+      abi: erc20Abi,
+      functionName: "approve",
+      args: [addresses.permit2, (1n << 256n) - 1n],
+      chain,
+      account: wc.account!,
+      gas: GAS.approve,
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
+  }
+  const p2 = await wc.writeContract({
+    address: addresses.permit2,
+    abi: permit2Abi,
+    functionName: "approve",
+    args: [
+      token,
+      addresses.positionManager,
+      (1n << 160n) - 1n,
+      Number((1n << 48n) - 1n),
+    ],
+    chain,
+    account: wc.account!,
+    gas: GAS.permit2,
+  });
+  await publicClient.waitForTransactionReceipt({ hash: p2 });
+}
+
+export async function hunt(
+  owner: Address,
+  wc: WalletClient,
+  retailZeroForOne = true,
+  retailIn = 10n ** 18n,
+  fillIn = 5n * 10n ** 17n,
+  bidAmt = 2n * 10n ** 18n,
+): Promise<Hex> {
+  const hash = await wc.writeContract({
+    address: addresses.agent,
+    abi: [
+      {
+        type: "function",
+        name: "hunt",
+        stateMutability: "nonpayable",
+        inputs: [
+          { name: "retailZeroForOne", type: "bool" },
+          { name: "retailIn", type: "uint256" },
+          { name: "fillIn", type: "uint256" },
+          { name: "bidAmt", type: "uint256" },
+        ],
+        outputs: [],
+      },
+    ] as const,
+    functionName: "hunt",
+    args: [retailZeroForOne, retailIn, fillIn, bidAmt],
+    chain,
+    account: wc.account!,
+    gas: GAS.hunt,
   });
   await publicClient.waitForTransactionReceipt({ hash });
   return hash;

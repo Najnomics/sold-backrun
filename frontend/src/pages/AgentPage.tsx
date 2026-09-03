@@ -1,10 +1,15 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { addresses, explorerAddress, explorerTx, isZero } from "../lib/clients";
 import { useAppData } from "../context/AppData";
+import { useToast } from "../context/Toast";
+import { hunt } from "../lib/actions";
 import { fmt, short } from "../lib/format";
 
 export function AgentPage() {
-  const { events, recaptured, ready } = useAppData();
+  const { events, recaptured, ready, signer, refresh } = useAppData();
+  const toast = useToast();
+  const [busy, setBusy] = useState<string | null>(null);
   const sold = events.filter((e) => !e.attested);
   const posted = events.filter((e) => e.attested);
   const agent = addresses.agent;
@@ -45,14 +50,31 @@ export function AgentPage() {
             function.
           </p>
           <div className="hero-cta">
+            {live && signer && (
+              <button
+                className="btn btn-primary"
+                disabled={!!busy}
+                onClick={async () => {
+                  setBusy("hunt()…");
+                  try {
+                    const hash = await hunt(signer.owner, signer.wc);
+                    toast.ok("hunt() filled a right", explorerTx(hash));
+                    await refresh();
+                  } catch (e) {
+                    toast.err((e as Error).message.slice(0, 120));
+                  } finally {
+                    setBusy(null);
+                  }
+                }}
+              >
+                {busy ?? "Call hunt()"}
+              </button>
+            )}
             {live && explorerAddress(agent) && (
-              <a className="btn btn-primary" href={explorerAddress(agent)} target="_blank" rel="noreferrer">
+              <a className="btn btn-outline" href={explorerAddress(agent)} target="_blank" rel="noreferrer">
                 Agent {short(agent)}
               </a>
             )}
-            <Link to="/swap" className="btn btn-outline">
-              Post a retail right
-            </Link>
           </div>
         </div>
       </section>
